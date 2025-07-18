@@ -40,8 +40,6 @@ export default class Game extends Scene {
     this.handleInteract();
 
     this.addChild(this.background);
-
-    
   }
 
   unlock(){
@@ -252,9 +250,16 @@ private resetCurrentCombination(): void {
     this.currentRotation = 0;
 }
 
-private combinationCorrect(): void{
-    this.unlock();
-  }
+private combinationCorrect(): Promise<void> {
+    return new Promise((resolve) => {
+        this.unlock();
+        // Wait 5 seconds before resetting and resolving
+        gsap.delayedCall(5, () => {
+            this.reset();
+            resolve();
+        });
+    });
+}
 
 private spinHandleCrazy(): void {
     // Reset current rotation first
@@ -289,6 +294,18 @@ private spinHandleCrazy(): void {
 
     centerObjects(this.background);
     centerObjects(this.vaultOpen);
+  }
+
+
+  reset(){
+    this.removeChildren();
+    this.load();
+    this.resizeSprite();
+    this.handleInteract();
+    this.resetCurrentCombination();
+    this.isDragging = false;
+    this.currentRotation = 0;
+    this.currCombination = null;
   }
 
   async start() {

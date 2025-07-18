@@ -15,6 +15,16 @@ export default {
       ],
       panSpeed: 0.2,
     },
+    opened: {
+      layers: [
+        "doorOpenShadow",
+        "doorOpen",
+        "blink",
+        "blink",
+        "blink",
+      ],
+      panSpeed: 0.2,
+    },
   },
 
 } as Config;

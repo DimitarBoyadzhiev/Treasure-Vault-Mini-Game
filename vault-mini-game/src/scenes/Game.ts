@@ -10,9 +10,15 @@ export default class Game extends Scene {
   name = "Game";
 
   private background!: ParallaxBackground;
+  private vaultOpen!: ParallaxBackground;
   private door!: Sprite;
   private handle!: Sprite;
   private handleShadow!: Sprite;
+  private doorOpen!: Sprite;
+  private doorOpenShadow!: Sprite;
+  private blink1!: Sprite;
+  private blink2!: Sprite;
+  private blink3!: Sprite;
   private vaultCombination!: VaultCombination;
 
   private isDragging = false;
@@ -25,6 +31,8 @@ export default class Game extends Scene {
 
   load() {
     this.background = new ParallaxBackground(config.backgrounds.vault);
+    this.vaultOpen = new ParallaxBackground(config.backgrounds.opened);
+
     this.vaultCombination = new VaultCombination();
 
     this.resizeSprite();
@@ -32,15 +40,71 @@ export default class Game extends Scene {
     this.handleInteract();
 
     this.addChild(this.background);
+
+    this.door.visible = false;
+    this.handle.visible = false;
+    this.handleShadow.visible = false;
+
+
+    // Get the sprites
+    this.doorOpenShadow = this.vaultOpen.getChildAt(0) as Sprite;
+    this.doorOpen = this.vaultOpen.getChildAt(1) as Sprite;
+    this.blink1 = this.vaultOpen.getChildAt(2) as Sprite;
+    this.blink2 = this.vaultOpen.getChildAt(3) as Sprite;
+    this.blink3 = this.vaultOpen.getChildAt(4) as Sprite;
+
+    // Resize the sprites
+    this.doorOpen.width = 250;
+    this.doorOpen.height = 450;
+    this.doorOpenShadow.width = 250;
+    this.doorOpenShadow.height = 450;
+    this.blink1.width = 150;
+    this.blink1.height = 150;
+    this.blink2.width = 150;
+    this.blink2.height = 150;
+    this.blink3.width = 150;
+    this.blink3.height = 150;
+
+    // Set anchor points
+    this.doorOpen.anchor.set(-.6, 0.52);
+    this.doorOpenShadow.anchor.set(-.68, 0.5);
+    this.blink1.anchor.set(1.3, 0.55);
+    this.blink2.anchor.set(.6, 0.6);
+    this.blink3.anchor.set(0.2, -.05);
+
+    this.addChild(this.vaultOpen);
+  }
+
+  unlock(){
+    this.door.visible = false;
+    this.handle.visible = false;
+    this.handleShadow.visible = false;
+
+
+    // Get the sprites
+    this.doorOpen = this.vaultOpen.getChildAt(0) as Sprite;
+    this.doorOpenShadow = this.vaultOpen.getChildAt(1) as Sprite;
+
+    // Resize the sprites
+    this.doorOpen.width = 450;
+    this.doorOpen.height = 450;
+    this.doorOpenShadow.width = 450;
+    this.doorOpenShadow.height = 450;
+
+    // Set anchor points
+    this.doorOpen.anchor.set(0.48, 0.52);
+    this.doorOpenShadow.anchor.set(0.48, 0.52);
+
+    this.addChild(this.vaultOpen);
   }
 
   resizeSprite(){
-    //get sprites from background
+    // Get sprites from background
     this.door = this.background.getChildAt(1) as Sprite;
     this.handleShadow = this.background.getChildAt(2) as Sprite;
     this.handle = this.background.getChildAt(3) as Sprite;
 
-    //assign sizes
+    // Assign sizes
     this.door.width = 450;
     this.door.height = 450;
     this.handle.width = 150;
@@ -48,7 +112,7 @@ export default class Game extends Scene {
     this.handleShadow.width = 150;
     this.handleShadow.height = 150;
 
-    //set anchor points
+    // Set anchor points
     this.door.anchor.set(0.48, 0.52);
     this.handle.anchor.set(0.55, 0.58);
     this.handleShadow.anchor.set(0.53, 0.53);
@@ -134,8 +198,11 @@ private onDragEnd(): void {
     if (this.currCombination) {
         const isCorrect = this.vaultCombination.checkMove(
             this.currCombination.number,
-            this.currCombination.direction
-        );
+            this.currCombination.direction);
+
+        if(this.vaultCombination.isCracked()) {
+          this.combinationCorrect();
+        };
 
         if (!isCorrect) {
             this.spinHandleCrazy(); // Spin when wrong
@@ -163,10 +230,50 @@ private onDragEnd(): void {
         ease: "back.out(1.7)"
     });
 }
+
+blinkAnimate(): void{
+    // Sparkle 1 with scale and opacity
+    gsap.to(this.blink1, {
+      alpha: 0.8,
+      scale: 1.2,
+      duration: 1.5,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true
+    });
+
+    // Sparkle 2 with different timing
+    gsap.to(this.blink2, {
+      alpha: 0.9,
+      scale: 1.3,
+      duration: 2,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+      delay: 0.3
+    });
+
+    // Sparkle 3 with rotation
+    gsap.to(this.blink3, {
+      alpha: 0.7,
+      scale: 1.1,
+      rotation: Math.PI * 2,
+      duration: 1.8,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
+      delay: 0.6
+    });
+}
+
 private resetCurrentCombination(): void {
     this.currCombination = null;
     this.currentRotation = 0;
 }
+
+private combinationCorrect(): void{
+    this.unlock();
+  }
 
 private spinHandleCrazy(): void {
     // Reset current rotation first
@@ -192,30 +299,15 @@ private spinHandleCrazy(): void {
 
 
   onResize(width: number, height: number): void {
-    // Keep background aspect ratio, scale to cover
-    const bgTexture = this.background;
-    const bgRatio = bgTexture.width / bgTexture.height;
-    const screenRatio = width / height;
+    const scaleX = width / 1920 *2;
+    const scaleY = height / 1080 *2;
+    const scale = Math.min(scaleX, scaleY); // Changed to Math.min to fit screen
 
-    if (screenRatio > bgRatio) {
-      // Wider screen, match width
-      this.background.width = width;
-      this.background.height = width / bgRatio;
-    } else {
-      // Taller screen, match height
-      this.background.height = height;
-      this.background.width = height * bgRatio;
-    }
+    this.background.scale.set(scale);
+    this.vaultOpen.scale.set(scale);
 
-    // Center background
-    this.background.x = (width - this.background.width) / 2;
-    this.background.y = (height - this.background.height) / 2;
-
-    // Center the door (no scaling, keep original size)
-    this.door.x = width / 2;
-    this.door.y = height / 2;
-
-    centerObjects(this.door, this.background);
+    centerObjects(this.background);
+    centerObjects(this.vaultOpen);
   }
 
   async start() {

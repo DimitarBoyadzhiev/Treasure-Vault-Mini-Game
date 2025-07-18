@@ -42,6 +42,11 @@ export class VaultCombination {
         if (currentPair.number === number && currentPair.direction === direction) {
             console.log(`Correct! Progress: ${this.currentIndex + 1}/${this.combination.length}`);
             this.currentIndex++;
+            if (this.currentIndex >= this.combination.length) {
+                console.log('Combination cracked!!!!!');
+                this.vaultCracked = true;
+                return false;
+            }
             return true;
         }
 

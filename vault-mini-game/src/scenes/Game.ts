@@ -64,7 +64,7 @@ export default class Game extends Scene {
         .on('pointermove', this.onDragMove, this)
         .on('pointerup', this.onDragEnd, this)
         .on('pointerupoutside', this.onDragEnd, this);
-}
+  }
 
  private updateCurrentCombination(direction: 'clockwise' | 'counterclockwise'): void {
         // Calculate number based on complete rotations (60 degrees each)
@@ -82,13 +82,13 @@ export default class Game extends Scene {
         // console.log(`Direction: ${this.currCombination.direction}`);
     }
 
-private onDragStart(event: any): void {
-    this.isDragging = true;
-    const localPos = event.data.getLocalPosition(this.handle.parent);
-    this.lastMouseAngle = Math.atan2(
-        localPos.y - this.handle.y,
-        localPos.x - this.handle.x
-    );
+  private onDragStart(event: any): void {
+      this.isDragging = true;
+      const localPos = event.data.getLocalPosition(this.handle.parent);
+      this.lastMouseAngle = Math.atan2(
+          localPos.y - this.handle.y,
+          localPos.x - this.handle.x
+  );
 }
 
 private getRotationDirection(delta: number): 'clockwise' | 'counterclockwise' {
@@ -131,15 +131,17 @@ private onDragEnd(): void {
     this.isDragging = false;
 
 
-    // Check move against vault combination
     if (this.currCombination) {
-        this.vaultCombination.checkMove(
+        const isCorrect = this.vaultCombination.checkMove(
             this.currCombination.number,
             this.currCombination.direction
         );
-    }
 
-    if (this.currCombination) {
+        if (!isCorrect) {
+            this.spinHandleCrazy(); // Spin when wrong
+            return;
+        }
+
         console.log(
             '%cFinal Move:', 
             'color: #ff0000; font-weight: bold; font-size: 14px'
@@ -164,6 +166,28 @@ private onDragEnd(): void {
 private resetCurrentCombination(): void {
     this.currCombination = null;
     this.currentRotation = 0;
+}
+
+private spinHandleCrazy(): void {
+    // Reset current rotation first
+    this.currentRotation = 0;
+
+    // Spin multiple full rotations clockwise
+    gsap.to([this.handle, this.handleShadow], {
+        rotation: Math.PI * 20, // Spin number of rotations
+        duration: 1,
+        ease: "elastic.out(0.5, 0.1)", // Amplitude to period / more bouncy
+        onComplete: () => {
+            // Reset rotation after spin
+            gsap.to([this.handle, this.handleShadow], {
+                rotation: 0,
+                duration: 0,
+                onComplete: () => {
+                    this.resetCurrentCombination();
+                }
+            });
+        }
+    });
 }
 
 

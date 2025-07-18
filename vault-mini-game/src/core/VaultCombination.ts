@@ -9,13 +9,6 @@ export class VaultCombination {
     
     constructor() {
         this.combination = this.generateRandomCombination();
-        console.log('%cVault Combination:', 'color: #ff0000; font-weight: bold; font-size: 14px');
-        this.combination.forEach((pair, index) => {
-            console.log(
-                `%cPair ${index + 1}: Number ${pair.number} - ${pair.direction}`,
-                'color: #00ff00; font-weight: bold'
-            );
-        });
     }
 
     private generateRandomCombination(): CombinationPair[] {
@@ -26,6 +19,13 @@ export class VaultCombination {
                 direction: Math.random() < 0.5 ? 'clockwise' : 'counterclockwise'
             });
         }
+        console.log('%cVault Combination:', 'color: #ff0000; font-weight: bold; font-size: 14px');
+        combination.forEach((pair, index) => {
+            console.log(
+                `%cPair ${index + 1}: Number ${pair.number} - ${pair.direction}`,
+                'color: #00ff00; font-weight: bold'
+            );
+        });
         return combination;
     }
 
@@ -46,6 +46,7 @@ export class VaultCombination {
 
         console.log('Wrong move, resetting progress');
         this.currentIndex = 0;
+        this.generateRandomCombination();
         return false;
     }
 

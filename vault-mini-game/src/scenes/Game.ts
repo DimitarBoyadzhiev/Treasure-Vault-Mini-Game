@@ -18,6 +18,8 @@ export default class Game extends Scene {
   private isDragging = false;
   private lastMouseAngle = 0;
   private currentRotation = 0;
+  private currCombination: { number: number; direction: 'clockwise' | 'counterclockwise' } | null = null;
+
     
   
 
@@ -64,6 +66,22 @@ export default class Game extends Scene {
         .on('pointerupoutside', this.onDragEnd, this);
 }
 
+ private updateCurrentCombination(direction: 'clockwise' | 'counterclockwise'): void {
+        // Calculate number based on complete rotations (60 degrees each)
+        const rotations = Math.abs(Math.round(this.currentRotation / (Math.PI / 3)));
+        const number = ((rotations % 9) || 9); // Convert 0 to 9, keep 1-9 as is
+
+        this.currCombination = {
+            number,
+            direction
+        };
+
+        // Debug log
+        // console.log('%cCurrent Combination:', 'color: #0000ff; font-weight: bold');
+        // console.log(`Number: ${this.currCombination.number} (${rotations} rotations)`);
+        // console.log(`Direction: ${this.currCombination.direction}`);
+    }
+
 private onDragStart(event: any): void {
     this.isDragging = true;
     const localPos = event.data.getLocalPosition(this.handle.parent);
@@ -88,7 +106,6 @@ private onDragMove(event: any): void {
 
     let delta = currentAngle - this.lastMouseAngle;
     
-    // If delta is too large (wrap around), ignore this update
     if (Math.abs(delta) > Math.PI) {
         this.lastMouseAngle = currentAngle;
         return;
@@ -96,25 +113,57 @@ private onDragMove(event: any): void {
 
     const direction = this.getRotationDirection(delta);
     this.currentRotation += delta;
+
+    // Update current combination
+    this.updateCurrentCombination(direction);
     
-    // Simple snap to 60-degree increments
     const snappedRotation = Math.round(this.currentRotation / (Math.PI / 3)) * (Math.PI / 3);
 
-    // Animate rotation instead of direct setting
     gsap.to([this.handle, this.handleShadow], {
         rotation: snappedRotation,
         duration: 0.2,
-        ease: "power2.out"
     });
-
-    // Optional: Log rotation direction
-    console.log(`Rotating ${direction}`);
 
     this.lastMouseAngle = currentAngle;
 }
 
 private onDragEnd(): void {
     this.isDragging = false;
+
+
+    // Check move against vault combination
+    if (this.currCombination) {
+        this.vaultCombination.checkMove(
+            this.currCombination.number,
+            this.currCombination.direction
+        );
+    }
+
+    if (this.currCombination) {
+        console.log(
+            '%cFinal Move:', 
+            'color: #ff0000; font-weight: bold; font-size: 14px'
+        );
+        console.log(
+            `%c🔒 Locked at: Number ${this.currCombination.number}, Direction: ${this.currCombination.direction}`,
+            'color: #ff0000; font-style: italic'
+        );
+    }
+
+    // Reset combination after logging
+    this.resetCurrentCombination();
+
+    // Snap to final position with animation
+    const snappedRotation = Math.round(this.currentRotation / (Math.PI / 3)) * (Math.PI / 3);
+    gsap.to([this.handle, this.handleShadow], {
+        rotation: snappedRotation,
+        duration: 0.3,
+        ease: "back.out(1.7)"
+    });
+}
+private resetCurrentCombination(): void {
+    this.currCombination = null;
+    this.currentRotation = 0;
 }
 
 

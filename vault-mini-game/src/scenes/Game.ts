@@ -302,10 +302,6 @@ private spinHandleCrazy(): void {
     this.load();
     this.resizeSprite();
     this.handleInteract();
-    this.resetCurrentCombination();
-    this.isDragging = false;
-    this.currentRotation = 0;
-    this.currCombination = null;
   }
 
   async start() {

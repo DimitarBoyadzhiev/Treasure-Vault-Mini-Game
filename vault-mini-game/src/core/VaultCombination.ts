@@ -4,8 +4,9 @@ interface CombinationPair {
 }
 
 export class VaultCombination {
-    private readonly combination: CombinationPair[] = [];
+    private combination: CombinationPair[] = [];
     private currentIndex: number = 0;
+    private vaultCracked: boolean = false;
     
     constructor() {
         this.combination = this.generateRandomCombination();
@@ -46,8 +47,12 @@ export class VaultCombination {
 
         console.log('Wrong move, resetting progress');
         this.currentIndex = 0;
-        this.generateRandomCombination();
+        this.combination = this.generateRandomCombination();
         return false;
+    }
+
+    public isCracked(): boolean {
+        return this.vaultCracked;
     }
 
     public isComplete(): boolean {

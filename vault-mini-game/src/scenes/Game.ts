@@ -41,6 +41,10 @@ export default class Game extends Scene {
 
     this.addChild(this.background);
 
+    
+  }
+
+  unlock(){
     this.door.visible = false;
     this.handle.visible = false;
     this.handleShadow.visible = false;
@@ -73,29 +77,6 @@ export default class Game extends Scene {
     this.blink3.anchor.set(0.2, -.05);
 
     this.setupGlitterAnimation();
-
-    this.addChild(this.vaultOpen);
-  }
-
-  unlock(){
-    this.door.visible = false;
-    this.handle.visible = false;
-    this.handleShadow.visible = false;
-
-
-    // Get the sprites
-    this.doorOpen = this.vaultOpen.getChildAt(0) as Sprite;
-    this.doorOpenShadow = this.vaultOpen.getChildAt(1) as Sprite;
-
-    // Resize the sprites
-    this.doorOpen.width = 450;
-    this.doorOpen.height = 450;
-    this.doorOpenShadow.width = 450;
-    this.doorOpenShadow.height = 450;
-
-    // Set anchor points
-    this.doorOpen.anchor.set(0.48, 0.52);
-    this.doorOpenShadow.anchor.set(0.48, 0.52);
 
     this.addChild(this.vaultOpen);
   }

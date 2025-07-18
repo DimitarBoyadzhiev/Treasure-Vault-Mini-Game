@@ -72,6 +72,8 @@ export default class Game extends Scene {
     this.blink2.anchor.set(.6, 0.6);
     this.blink3.anchor.set(0.2, -.05);
 
+    this.setupGlitterAnimation();
+
     this.addChild(this.vaultOpen);
   }
 
@@ -154,7 +156,39 @@ export default class Game extends Scene {
           localPos.x - this.handle.x
   );
 }
+private setupGlitterAnimation(): void {
+    // Hide blinks initially
+    this.blink1.alpha = 0;
+    this.blink2.alpha = 0;
+    this.blink3.alpha = 0;
 
+    // Create timeline for sequence
+    const timeline = gsap.timeline({
+        repeat: -1, // Infinite repeat
+    });
+
+    // Add blinks to timeline with staggered starts
+    timeline
+        .to(this.blink1, {
+            alpha: 1,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1
+        })
+        .to(this.blink2, {
+            alpha: 1,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1
+        }, "-=0.5")
+        .to(this.blink3, {
+            alpha: 1,
+            duration: 0.5,
+            yoyo: true,
+            repeat: 1
+        }, "-=0.6")
+        .to({}, { duration: .1 }); // Pause between sequences
+}
 private getRotationDirection(delta: number): 'clockwise' | 'counterclockwise' {
     return delta > 0 ? 'clockwise' : 'counterclockwise';
 }
@@ -231,40 +265,6 @@ private onDragEnd(): void {
     });
 }
 
-blinkAnimate(): void{
-    // Sparkle 1 with scale and opacity
-    gsap.to(this.blink1, {
-      alpha: 0.8,
-      scale: 1.2,
-      duration: 1.5,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true
-    });
-
-    // Sparkle 2 with different timing
-    gsap.to(this.blink2, {
-      alpha: 0.9,
-      scale: 1.3,
-      duration: 2,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
-      delay: 0.3
-    });
-
-    // Sparkle 3 with rotation
-    gsap.to(this.blink3, {
-      alpha: 0.7,
-      scale: 1.1,
-      rotation: Math.PI * 2,
-      duration: 1.8,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
-      delay: 0.6
-    });
-}
 
 private resetCurrentCombination(): void {
     this.currCombination = null;

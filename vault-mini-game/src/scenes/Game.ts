@@ -41,6 +41,8 @@ export default class Game extends Scene {
     this.handleInteract();
 
     this.addChild(this.background);
+
+    this.unlock();
   }
 
   unlock(){
@@ -73,7 +75,7 @@ export default class Game extends Scene {
     this.doorOpenShadow.anchor.set(-.68, 0.5);
     this.blink1.anchor.set(1.3, 0.55);
     this.blink2.anchor.set(.6, 0.6);
-    this.blink3.anchor.set(0.2, -.05);
+    this.blink3.anchor.set(0.25, -.05);
 
     this.setupGlitterAnimation();
 
@@ -283,6 +285,28 @@ private spinHandleCrazy(): void {
     });
 }
 
+private spinHandleCrazyNoCombinationReset(): void {
+    // Reset current rotation first
+    this.currentRotation = 0;
+
+    // Spin multiple full rotations clockwise
+    gsap.to([this.handle, this.handleShadow], {
+        rotation: Math.PI * 20, // Spin number of rotations
+        duration: 1,
+        ease: "elastic.out(0.5, 0.1)", // Amplitude to period / more bouncy
+        onComplete: () => {
+            // Reset rotation after spin
+            gsap.to([this.handle, this.handleShadow], {
+                rotation: 0,
+                duration: 0,
+                onComplete: () => {
+                    // No reset of current combination here
+                }
+            });
+        }
+    });
+}
+
 
 
   onResize(width: number, height: number): void {
@@ -301,8 +325,7 @@ private spinHandleCrazy(): void {
   reset(){
     this.removeChildren();
     this.load();
-    this.resizeSprite();
-    this.handleInteract();
+    this.spinHandleCrazyNoCombinationReset();
   }
 
   async start() {

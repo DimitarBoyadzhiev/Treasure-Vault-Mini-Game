@@ -21,6 +21,7 @@ export default class Game extends Scene {
   private blink3!: Sprite;
   private vaultCombination!: VaultCombination;
 
+  
   private isDragging = false;
   private lastMouseAngle = 0;
   private currentRotation = 0;
@@ -244,7 +245,6 @@ private onDragEnd(): void {
     });
 }
 
-
 private resetCurrentCombination(): void {
     this.currCombination = null;
     this.currentRotation = 0;
@@ -282,6 +282,7 @@ private spinHandleCrazy(): void {
         }
     });
 }
+
 
 
   onResize(width: number, height: number): void {

@@ -41,8 +41,6 @@ export default class Game extends Scene {
     this.handleInteract();
 
     this.addChild(this.background);
-
-    this.unlock();
   }
 
   unlock(){
